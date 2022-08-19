@@ -1,6 +1,7 @@
 import type { Adapter, SendTransactionOptions, WalletError, WalletName } from '@solana/wallet-adapter-base';
 import { WalletNotConnectedError, WalletNotReadyError, WalletReadyState } from '@solana/wallet-adapter-base';
 import type { Connection, PublicKey, Transaction } from '@solana/web3.js';
+import { useStandardWalletAdapters } from '@wallet-standard/solana-wallet-adapter-react';
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { WalletNotSelectedError } from './errors';
@@ -30,7 +31,7 @@ const initialState: {
 
 export const WalletProvider: FC<WalletProviderProps> = ({
     children,
-    wallets: adapters,
+    wallets: initialAdapters,
     autoConnect = false,
     onError,
     localStorageKey = 'walletName',
@@ -43,6 +44,9 @@ export const WalletProvider: FC<WalletProviderProps> = ({
     const isConnecting = useRef(false);
     const isDisconnecting = useRef(false);
     const isUnloading = useRef(false);
+
+    // Wrap standard wallets from `window.navigator.wallets` as adapters.
+    const adapters = useStandardWalletAdapters(initialAdapters);
 
     // Wrap adapters to conform to the `Wallet` interface
     const [wallets, setWallets] = useState(() =>
